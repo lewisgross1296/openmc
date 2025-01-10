@@ -549,15 +549,16 @@ class Integrator(ABC):
     """
 
     def __init__(
-            self,
-            operator: TransportOperator,
-            timesteps: Sequence[float],
-            power: Optional[Union[float, Sequence[float]]] = None,
-            power_density: Optional[Union[float, Sequence[float]]] = None,
-            source_rates: Optional[Sequence[float]] = None,
-            timestep_units: str = 's',
-            solver: str = "cram48"
-        ):
+        self,
+        operator: TransportOperator,
+        timesteps: Sequence[float],
+        power: Optional[Union[float, Sequence[float]]] = None,
+        power_density: Optional[Union[float, Sequence[float]]] = None,
+        source_rates: Optional[Sequence[float]] = None,
+        timestep_units: str = 's',
+        solver: str = "cram48",
+        continue_timesteps: bool = False
+    ):
         # Check number of stages previously used
         if operator.prev_res is not None:
             res = operator.prev_res[-1]
@@ -593,7 +594,7 @@ class Integrator(ABC):
 
         # Get list of times / units
         if isinstance(timesteps[0], Iterable):
-            times, units = zip(*timesteps)
+            times, units = zip(*timesteps)  # TODO understand
         else:
             times = timesteps
             units = [timestep_units] * len(timesteps)
@@ -628,6 +629,20 @@ class Integrator(ABC):
                 seconds.append(days*_SECONDS_PER_DAY)
             else:
                 raise ValueError(f"Invalid timestep unit '{unit}'")
+
+            # validate existing depletion steps are consistent with what is given to operatore
+            if (continue_timesteps):
+                completed_timesteps = operator.prev_res.get_times()
+                num_previous_steps_run = len(completed_timesteps)
+                for step in len(completed_timesteps):
+                    if (timesteps[step] == completed_timesteps[step]):
+                        continue
+                        # TODO check powers too
+                    else:
+                        raise ValueError(
+                            "You are attempting to continue a run in which the previous results do not have the same initial steps as those provided to the Integrator. Please make sure you are using the correct timesteps, powers, and previous results file.")
+                seconds = seconds[num_previous_steps_run:]
+                source_rates = source_rates[num_previous_steps_run:]
 
         self.timesteps = np.asarray(seconds)
         self.source_rates = np.asarray(source_rates)
