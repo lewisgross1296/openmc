@@ -556,7 +556,8 @@ class Integrator(ABC):
             power_density: Optional[Union[float, Sequence[float]]] = None,
             source_rates: Optional[Sequence[float]] = None,
             timestep_units: str = 's',
-            solver: str = "cram48"
+            solver: str = "cram48",
+            continue_timesteps: bool = False,
         ):
         # Check number of stages previously used
         if operator.prev_res is not None:
@@ -628,6 +629,27 @@ class Integrator(ABC):
                 seconds.append(days*_SECONDS_PER_DAY)
             else:
                 raise ValueError(f"Invalid timestep unit '{unit}'")
+
+            # validate existing depletion steps are consistent with those passed to operator
+            if continue_timesteps:
+                completed_timesteps = operator.prev_res.get_times()
+                completed_source_rates = operator.prev_res.get_source_rates()
+                num_previous_steps_run = len(completed_timesteps)
+                for step in len(completed_timesteps):
+                    if (
+                        timesteps[step] == completed_timesteps[step]
+                        and source_rates[step] == completed_source_rates[step]
+                    ):
+                        continue
+                    else:
+                        raise ValueError(
+                            "You are attempting to continue a run in which the previous results "
+                            "do not have the same initial steps as those provided to the "
+                            "Integrator. Please make sure you are using the correct timesteps,"
+                            "powers or power densities, and previous results file."
+                        )
+                seconds = seconds[num_previous_steps_run:]
+                source_rates = source_rates[num_previous_steps_run:]
 
         self.timesteps = np.asarray(seconds)
         self.source_rates = np.asarray(source_rates)
