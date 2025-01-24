@@ -635,7 +635,7 @@ class Integrator(ABC):
                 completed_timesteps = operator.prev_res.get_times()
                 completed_source_rates = operator.prev_res.get_source_rates()
                 num_previous_steps_run = len(completed_timesteps)
-                for step in len(completed_timesteps):
+                for step in range(num_previous_steps_run):
                     if (
                         timesteps[step] == completed_timesteps[step]
                         and source_rates[step] == completed_source_rates[step]
