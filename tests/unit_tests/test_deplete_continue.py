@@ -27,7 +27,7 @@ def test_continue(run_in_tmpdir, scheme):
     operator = dummy_operator.DummyOperator(prev_res)
 
     # if continue run happens, test passes
-    bundle.solver(operator, [0.75, 0.75], [1.0, 1.0], continue_timesteps = True).integrate()
+    bundle.solver(operator, [0.75, 0.75], [1.0, 1.0], continue_timesteps=True).integrate()
 
 @pytest.mark.parametrize("scheme", dummy_operator.SCHEMES)
 def test_mismatched_initial_times(run_in_tmpdir, scheme):
