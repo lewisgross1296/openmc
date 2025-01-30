@@ -474,7 +474,6 @@ class Results(list):
             with the units originally defined by the user.
 
         """
-
         source_rates = np.fromiter(
             (r.source_rate for r in self),
             dtype=self[0].source_rate.dtype,
