@@ -648,8 +648,8 @@ class Integrator(ABC):
                 completed_source_rates = operator.prev_res.get_source_rates()
                 num_previous_steps_run = len(completed_timesteps)
                 if (
-                    np.array_equal(completed_timesteps, timesteps[: num_previous_steps_run]) and
-                    np.array_equal(completed_source_rates, source_rates[: num_previous_steps_run])
+                    np.array_equal(completed_timesteps, timesteps[:num_previous_steps_run]) and
+                    np.array_equal(completed_source_rates, source_rates[:num_previous_steps_run])
                 ):
                     seconds = seconds[num_previous_steps_run:]
                     source_rates = source_rates[num_previous_steps_run:]
